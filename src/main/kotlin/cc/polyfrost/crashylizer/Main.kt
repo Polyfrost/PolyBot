@@ -1,19 +1,30 @@
 package cc.polyfrost.crashylizer
 
-import dev.kord.core.Kord
+import cc.polyfrost.crashylizer.extensions.PingExtension
+import com.kotlindiscord.kord.extensions.ExtensibleBot
+import com.kotlindiscord.kord.extensions.utils.env
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
 
-suspend fun main() {
-    val kord = Kord(
-        System.getenv("TOKEN") ?: error("No token provided with the TOKEN environment variable")
-    )
+private val token = env("TOKEN")
 
-    kord.login {
+suspend fun main() {
+    val bot = ExtensibleBot(token) {
         @OptIn(PrivilegedIntent::class)
-        intents {
-            +Intent.MessageContent
+        intents(false) {
             +Intent.GuildMessages
+            +Intent.DirectMessages
+            +Intent.MessageContent
+        }
+
+        presence {
+            watching("minecraft crash")
+        }
+
+        extensions {
+            add(::PingExtension)
         }
     }
+
+    bot.start()
 }
